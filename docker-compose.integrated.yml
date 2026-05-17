@@ -1,0 +1,194 @@
+version: '3.8'
+
+services:
+  # ============ 数据库服务 ============
+  postgres:
+    image: postgres:15-alpine
+    container_name: rag_postgres
+    environment:
+      POSTGRES_DB: rag_service
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - rag_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: rag_redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - rag_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  chroma:
+    image: chromadb/chroma:latest
+    container_name: rag_chroma
+    ports:
+      - "8005:8000"
+    networks:
+      - rag_network
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - ANONYMIZED_TELEMETRY=FALSE
+    restart: unless-stopped
+
+  # ============ 后端微服务 ============
+  user-service:
+    build:
+      context: ./backend-rag-customer-service
+      dockerfile: user-service/Dockerfile
+    container_name: rag_user_service
+    ports:
+      - "8001:8001"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/rag_service
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=your-super-secret-key-change-this-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - rag_network
+    restart: unless-stopped
+
+  knowledge-service:
+    build:
+      context: ./backend-rag-customer-service
+      dockerfile: knowledge-service/Dockerfile
+    container_name: rag_knowledge_service
+    ports:
+      - "8002:8002"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/rag_service
+      - REDIS_URL=redis://redis:6379/0
+      - CHROMA_HOST=chroma
+      - CHROMA_PORT=8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      chroma:
+        condition: service_started
+    networks:
+      - rag_network
+    restart: unless-stopped
+    volumes:
+      - upload_data:/app/uploads
+
+  chat-service:
+    build:
+      context: ./backend-rag-customer-service
+      dockerfile: chat-service/Dockerfile
+    container_name: rag_chat_service
+    ports:
+      - "8003:8003"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/rag_service
+      - REDIS_URL=redis://redis:6379/0
+      - CHROMA_HOST=chroma
+      - CHROMA_PORT=8000
+      - QWEN_API_KEY=${QWEN_API_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      chroma:
+        condition: service_started
+    networks:
+      - rag_network
+    restart: unless-stopped
+
+  alert-service:
+    build:
+      context: ./backend-rag-customer-service
+      dockerfile: alert-service/Dockerfile
+    container_name: rag_alert_service
+    ports:
+      - "8004:8004"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/rag_service
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - rag_network
+    restart: unless-stopped
+
+  api-gateway:
+    build:
+      context: ./backend-rag-customer-service
+      dockerfile: api-gateway/Dockerfile
+    container_name: rag_api_gateway
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/rag_service
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+      knowledge-service:
+        condition: service_started
+      chat-service:
+        condition: service_started
+      alert-service:
+        condition: service_started
+    networks:
+      - rag_network
+    restart: unless-stopped
+
+  # ============ 前端服务 ============
+  frontend:
+    build:
+      context: ./rag-agent-frontend
+      dockerfile: Dockerfile
+    container_name: rag_frontend
+    ports:
+      - "3000:80"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000
+    depends_on:
+      - api-gateway
+    networks:
+      - rag_network
+    restart: unless-stopped
+
+networks:
+  rag_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  chroma_data:
+  upload_data:
