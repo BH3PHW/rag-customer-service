@@ -100,6 +100,25 @@ export interface Alert {
   created_at: string;
 }
 
+export interface SemanticRule {
+  id?: string;
+  category: string;
+  description: string;
+  keywords: string[];
+  enabled: boolean;
+  requires_human: boolean;
+}
+
+export interface SensitiveSettings {
+  enable_semantic_detection: boolean;
+  enable_keyword_detection: boolean;
+  human_required_categories: string[];
+  semantic_rules: SemanticRule[];
+  sensitivity_threshold: number;
+  auto_escalation_enabled: boolean;
+  sensitive_words: string[];
+}
+
 class ApiClient {
   private baseUrl: string;
   private token: string | null = null;
@@ -345,6 +364,50 @@ class ApiClient {
     resolved: number;
   }>> {
     return this.request(`/api/v1/alerts/stats?enterprise_id=${enterpriseId}`);
+  }
+
+  // Sensitive settings endpoints
+  async getSensitiveSettings(enterpriseId: string): Promise<ApiResponse<SensitiveSettings>> {
+    return this.request<SensitiveSettings>(`/api/v1/enterprises/${enterpriseId}/sensitive-settings`);
+  }
+
+  async updateSensitiveSettings(
+    enterpriseId: string,
+    settings: SensitiveSettings
+  ): Promise<ApiResponse<SensitiveSettings>> {
+    return this.request<SensitiveSettings>(`/api/v1/enterprises/${enterpriseId}/sensitive-settings`, {
+      method: 'PUT',
+      body: JSON.stringify(settings),
+    });
+  }
+
+  async updateSensitiveWords(
+    enterpriseId: string,
+    sensitiveWords: string[]
+  ): Promise<ApiResponse<SensitiveSettings>> {
+    return this.request<SensitiveSettings>(`/api/v1/enterprises/${enterpriseId}/sensitive-words`, {
+      method: 'PUT',
+      body: JSON.stringify({ sensitive_words: sensitiveWords }),
+    });
+  }
+
+  async createSemanticRule(
+    enterpriseId: string,
+    rule: Omit<SemanticRule, 'id'>
+  ): Promise<ApiResponse<SemanticRule>> {
+    return this.request<SemanticRule>(`/api/v1/enterprises/${enterpriseId}/semantic-rules`, {
+      method: 'POST',
+      body: JSON.stringify(rule),
+    });
+  }
+
+  async deleteSemanticRule(
+    enterpriseId: string,
+    ruleId: string
+  ): Promise<ApiResponse<void>> {
+    return this.request<void>(`/api/v1/enterprises/${enterpriseId}/semantic-rules/${ruleId}`, {
+      method: 'DELETE',
+    });
   }
 }
 

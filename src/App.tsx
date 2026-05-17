@@ -1,10 +1,11 @@
-import { MessageSquare, FileText, Settings, Bot, Users, FileSearch } from 'lucide-react';
+import { MessageSquare, FileText, Settings, Bot, Users, FileSearch, ShieldAlert } from 'lucide-react';
 import { useAppStore } from './store';
 import Chat from './pages/Chat';
 import DocumentsPage from './pages/Documents';
 import SettingsPage from './pages/Settings';
 import UsersPage from './pages/Users';
 import CleaningPage from './pages/Cleaning';
+import SensitiveSettingsPage from './pages/SensitiveSettings';
 
 export default function App() {
   const { activePage, setActivePage, currentUser, enterpriseId } = useAppStore();
@@ -13,6 +14,7 @@ export default function App() {
     { id: 'chat', label: 'Chat', icon: MessageSquare, requireAuth: true },
     { id: 'documents', label: 'Documents', icon: FileText, requireAuth: true },
     { id: 'cleaning', label: 'Cleaning', icon: FileSearch, requireAuth: true },
+    { id: 'sensitive', label: 'Sensitive', icon: ShieldAlert, requireAuth: true },
     { id: 'settings', label: 'Settings', icon: Settings, requireAuth: true },
     { id: 'users', label: 'Profile', icon: Users, requireAuth: false },
   ];
@@ -25,6 +27,8 @@ export default function App() {
         return <DocumentsPage />;
       case 'cleaning':
         return <CleaningPage />;
+      case 'sensitive':
+        return <SensitiveSettingsPage />;
       case 'settings':
         return <SettingsPage />;
       case 'users':

@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import { api, User, LoginRequest, RegisterRequest } from './api/client';
 
 interface AppState {
-  activePage: 'chat' | 'documents' | 'settings' | 'users' | 'cleaning';
+  activePage: 'chat' | 'documents' | 'settings' | 'users' | 'cleaning' | 'sensitive';
   currentUser: User | null;
   enterpriseId: string | null;
   users: User[];

@@ -8,10 +8,11 @@ yarn.lock
 dist
 build
 
-# Environment
+# Environment - 敏感配置不提交
 .env
 .env.local
-.env.*.local
+.env.production
+*.local
 
 # IDE
 .vscode
@@ -30,4 +31,9 @@ npm-debug.log*
 # Cache
 .cache
 .parcel-cache
+
+# Backend
 backend-rag-customer-service
+
+# Environment template
+.env.example
