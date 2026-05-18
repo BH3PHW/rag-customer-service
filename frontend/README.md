@@ -1,263 +1,364 @@
-# RAG 智能客服系统 - 前端架构
+# RAG智能客服系统 - 前端应用
 
-## 📦 项目结构
+## 项目简介
 
-本项目采用 **Monorepo** 架构，使用 npm workspaces 管理多个独立应用和共享包。
+RAG智能客服系统前端应用，包含三个独立的前端项目，采用React+TypeScript+Vite技术栈。支持消费者端、企业管理端、系统管理端三个用户角色。
+
+## 技术栈
+
+- **框架**: React 18 + TypeScript
+- **构建工具**: Vite
+- **样式**: Tailwind CSS
+- **状态管理**: Zustand (轻量级)
+- **UI组件**: 自定义组件 (无第三方库依赖)
+- **API通信**: Fetch API
+- **包管理**: npm workspaces
+
+## 应用结构
 
 ```
 frontend/
-├── apps/                          # 应用层
-│   ├── consumer/                 # 用户端 Widget (React + TypeScript)
-│   ├── enterprise/              # 企业管理控制台 (React + TypeScript)
-│   └── system-admin/            # 系统管理后台 (React + TypeScript)
-│
-├── packages/                     # 共享包层
-│   ├── ui/                      # 共享 UI 组件库
-│   └── store/                   # 共享状态管理库
-│
-├── package.json                 # Monorepo 根配置
-├── tailwind.config.js          # 共享 Tailwind 配置
-└── postcss.config.js           # 共享 PostCSS 配置
+├── apps/
+│   ├── consumer/          # 消费者端 (3001)
+│   │   ├── src/
+│   │   │   ├── App.tsx
+│   │   │   ├── api/client.ts
+│   │   │   └── pages/Chat.tsx
+│   │   └── package.json
+│   ├── enterprise/        # 企业管理端 (3002)
+│   │   ├── src/
+│   │   │   ├── App.tsx
+│   │   │   ├── api/client.ts
+│   │   │   └── pages/
+│   │   │       ├── KnowledgeBase.tsx
+│   │   │       ├── ChatMonitor.tsx
+│   │   │       ├── SensitiveSettings.tsx
+│   │   │       ├── Channels.tsx
+│   │   │       └── Settings.tsx
+│   │   └── package.json
+│   └── system-admin/      # 系统管理端 (3003)
+│       ├── src/
+│       │   ├── App.tsx
+│       │   └── pages/
+│       │       ├── Tenants.tsx
+│       │       ├── Users.tsx
+│       │       ├── ApiConfig.tsx
+│       │       ├── ModelConfig.tsx
+│       │       └── Services.tsx
+│       └── package.json
+├── docs/                 # 文档
+│   ├── deployment.md    # 部署指南
+│   └── api-testing.md   # API测试指南
+├── tests/                # 测试
+│   └── debug_frontend.js
+└── package.json
 ```
 
-## 🚀 快速开始
+## 快速开始
+
+### 环境要求
+
+- Node.js >= 18.0.0
+- npm >= 9.0.0
 
 ### 安装依赖
 
 ```bash
-cd frontend
+# 安装所有应用的依赖
 npm install
 ```
 
-### 运行开发服务器
+### 启动开发服务器
 
-#### 运行单个应用
-
+**方式一：分别启动各应用**
 ```bash
-# 用户端 Widget (端口 3003)
-npm run dev:consumer
+# 消费者端 (3001)
+cd apps/consumer
+npm run dev
 
-# 企业管理控制台 (端口 3001)
-npm run dev:enterprise
+# 企业端 (3002)
+cd apps/enterprise
+npm run dev
 
-# 系统管理后台 (端口 3002)
-npm run dev:system-admin
-```
-
-#### 同时运行所有应用
-
-```bash
+# 系统管理端 (3003)
+cd apps/system-admin
 npm run dev
 ```
 
-### 构建生产版本
+## 各应用功能
+
+### 消费者端 (Consumer)
+- 🎨 浮动客服聊天窗口
+- 💬 实时智能对话
+- ⚡ SSE流式输出 (打字机效果)
+- 📱 响应式设计，支持移动端
+
+访问地址: http://localhost:3001
+
+### 企业管理端 (Enterprise)
+- 📊 会话监控与管理
+- 📚 知识库管理（文档上传、编辑）
+- 🔌 渠道接入管理
+- 🛡️ 敏感词与安全设置
+- 👥 团队成员管理
+- 📈 数据统计与分析
+
+访问地址: http://localhost:3002
+
+### 系统管理端 (System Admin)
+- 🏢 企业租户管理
+- 👤 用户管理
+- ⚙️ API配置与模型配置
+- 📊 系统监控与状态
+- 💾 存储配置
+- 🔧 系统设置
+
+访问地址: http://localhost:3003
+
+## 生产构建
 
 ```bash
 # 构建所有应用
 npm run build
 
-# 构建单个应用
-npm run build:consumer
-npm run build:enterprise
-npm run build:system-admin
+# 或构建单个应用
+npm run build --workspace=apps/consumer
+npm run build --workspace=apps/enterprise
+npm run build --workspace=apps/system-admin
 ```
 
-## 📱 应用说明
+## 环境变量
 
-### 1. 用户端 Widget (consumer)
+创建 `.env` 文件:
 
-面向终端用户的智能客服 Widget，包含：
-- 💬 智能对话（RAG 增强）
-- 🔄 实时流式响应
-- 📎 消息输入与发送
+```env
+# API Gateway地址
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
 
-**技术栈**：React 18 + TypeScript + Tailwind CSS + Zustand
-
-**端口**：3003
-
----
-
-### 2. 企业管理控制台 (enterprise)
-
-面向企业的客服管理平台，包含：
-- 📚 知识库管理
-- 📄 文档上传与管理
-- 🧹 数据清洗
-- 🛡️ 敏感词设置
-- 💬 对话监控
-- 👨‍💻 人工坐席管理
-- 🔗 渠道接入配置
-- ⚙️ 系统设置
-
-**技术栈**：React 18 + TypeScript + Tailwind CSS
-
-**端口**：3001
+# 应用环境
+NEXT_PUBLIC_APP_ENV=development
+```
 
 ---
 
-### 3. 系统管理后台 (system-admin)
+## 前后端联合调试
 
-系统管理员专用后台，包含：
-- 🏢 租户管理
-- 👥 用户管理
-- 🤖 大模型配置
-- 💾 存储配置
-- 📊 服务监控
-- 🔔 告警中心
-- ⚙️ API/模型参数设置
+### 前置条件
 
-**技术栈**：React 18 + TypeScript + Tailwind CSS
+1. 确保已克隆两个仓库:
+   - 前端: `https://github.com/BH3PHW/rag-agent-frontend`
+   - 后端: `https://github.com/BH3PHW/rag-customer-service`
 
-**端口**：3002
+### 完整开发流程
+
+#### 1. 先启动后端服务
+
+```bash
+# 进入后端目录
+cd ../backend
+
+# 启动 API Gateway (8080)
+cd api-gateway
+uvicorn main:app --reload --port 8080
+```
+
+验证后端启动成功:
+- 访问 http://localhost:8080/health
+- 访问 http://localhost:8080/docs (API文档)
+
+#### 2. 配置前端API地址
+
+检查并确保前端API配置指向本地后端:
+
+编辑 `apps/[app-name]/src/api/client.ts`:
+```typescript
+const API_BASE_URL = 'http://localhost:8080';
+```
+
+#### 3. 启动前端应用
+
+打开新的终端窗口:
+
+```bash
+# 消费者端 (3001)
+cd apps/consumer
+npm run dev
+
+# (另开终端) 企业端 (3002)
+cd apps/enterprise
+npm run dev
+
+# (另开终端) 系统管理端 (3003)
+cd apps/system-admin
+npm run dev
+```
+
+#### 4. 验证联合调试
+
+访问以下地址:
+- 消费者端: http://localhost:3001
+- 企业端: http://localhost:3002
+- 系统管理端: http://localhost:3003
+- API文档: http://localhost:8080/docs
+
+### 使用前端调试脚本
+
+运行联合调试测试:
+
+```bash
+cd tests
+
+# 完整调试 (所有应用)
+node debug_frontend.js --all
+
+# 调试单个应用
+node debug_frontend.js --consumer
+node debug_frontend.js --enterprise
+node debug_frontend.js --admin
+```
+
+调试内容:
+- 消费者端: 聊天、知识库测试
+- 企业端: 登录、会话、知识库管理测试
+- 系统管理端: 系统管理功能测试
+- API匹配度验证
 
 ---
 
-## 🎨 共享组件库 (@rag/ui)
+## 前后端联合部署
 
-提供统一的 UI 组件，包含：
+### 完整部署架构
 
-- **Button** - 多样式按钮组件
-- **Card** - 卡片容器组件
-- **Input** / **Textarea** - 表单输入组件
-- **Tabs** - 标签页组件
-- **NavItem** - 导航项组件
-- **Layout** - 页面布局组件
-- **LoadingSpinner** - 加载动画
-- **Tag** - 标签组件
+```
+┌─────────────────────────────────────────────────────┐
+│              CDN/负载均衡 (Vercel/Nginx)           │
+└────────────┬────────────────────────────────────────┘
+             │
+    ┌────────┴────────┐
+    │                 │
+┌───▼────┐      ┌─────▼─────┐
+│ 前端   │      │  后端     │
+│ 部署   │      │  部署     │
+└───┬────┘      └─────┬─────┘
+    │                 │
+┌───▼────────────┐  ┌─▼───────────┐
+│ consumer 3001  │  │ API GW 8080 │
+│ enterprise 3002│  │ 微服务集群  │
+│ system-admin  │  └─────────────┘
+└───────────────┘
+```
 
-### 使用示例
+### 生产部署方案
 
-```tsx
-import { Button, Card, Input } from '@rag/ui';
+#### 方案一：Vercel部署前端 + Docker部署后端
 
-function Example() {
-  return (
-    <Card>
-      <Input label="用户名" placeholder="请输入" />
-      <Button>提交</Button>
-    </Card>
-  );
+**前端部署到Vercel**
+```bash
+# 1. 推送代码到 GitHub
+git push origin main
+
+# 2. 在 Vercel 中导入项目并配置环境变量
+NEXT_PUBLIC_API_BASE_URL=https://api.your-domain.com
+```
+
+**后端部署到Docker**
+```bash
+cd backend
+docker-compose up -d
+```
+
+#### 方案二：Nginx部署前端和后端
+
+**前端Nginx配置**
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;
+
+    # 消费者端
+    location / {
+        root /var/www/frontend/apps/consumer/dist;
+        try_files $uri $uri/ /index.html;
+    }
+
+    # 企业端
+    location /enterprise {
+        alias /var/www/frontend/apps/enterprise/dist;
+        try_files $uri $uri/ /enterprise/index.html;
+    }
+
+    # 管理端
+    location /admin {
+        alias /var/www/frontend/apps/system-admin/dist;
+        try_files $uri $uri/ /admin/index.html;
+    }
+
+    # API 反向代理
+    location /api {
+        proxy_pass http://localhost:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
 }
 ```
 
----
+### 生产环境变量配置
 
-## 🏪 共享状态管理 (@rag/store)
-
-提供全局状态管理，包含：
-
-- **useAuthStore** - 用户认证状态
-- **useChatStore** - 聊天会话状态
-- **apiClient** - API 请求封装
-
-### 使用示例
-
-```tsx
-import { useAuthStore, apiClient } from '@rag/store';
-
-// 获取用户信息
-const { user, login } = useAuthStore();
-
-// 发送 API 请求
-const data = await apiClient('/users/me');
+**后端环境变量**
+```env
+DATABASE_URL=postgresql://user:pass@production-db/rag_db
+REDIS_URL=redis://production-redis:6379/0
+JWT_SECRET_KEY=your-secure-production-key
+OPENAI_API_KEY=sk-production-key
+CORS_ORIGINS=["https://your-domain.com"]
 ```
 
----
-
-## 🎯 开发规范
-
-### 命名规范
-
-- 组件文件：`PascalCase.tsx` (如 `KnowledgeBase.tsx`)
-- 工具函数：`camelCase.ts` (如 `apiClient.ts`)
-- 常量：`UPPER_SNAKE_CASE` (如 `MAX_RETRIES`)
-
-### 目录结构
-
-```
-apps/{app-name}/
-├── src/
-│   ├── pages/           # 页面组件
-│   ├── components/      # 业务组件
-│   ├── hooks/          # 自定义 Hooks
-│   ├── api/            # API 客户端
-│   ├── utils/         # 工具函数
-│   ├── store.ts       # 状态管理
-│   ├── types.ts       # 类型定义
-│   ├── App.tsx        # 应用入口
-│   └── main.tsx       # 渲染入口
-├── package.json
-├── vite.config.ts
-├── tsconfig.json
-└── index.html
+**前端环境变量**
+```env
+NEXT_PUBLIC_API_BASE_URL=https://api.your-domain.com
+NEXT_PUBLIC_APP_ENV=production
 ```
 
-### 代码风格
+### 部署验证清单
 
-- 使用 **TypeScript** 严格模式
-- 组件使用 **函数式组件**
-- 状态管理使用 **Zustand**
-- 样式使用 **Tailwind CSS**
-- 图标使用 **Lucide React**
+部署完成后，请检查以下项目:
 
----
-
-## 🔧 技术栈
-
-### 核心框架
-- React 18.3
-- TypeScript 5.8
-- Vite 6.3
-
-### UI 框架
-- Tailwind CSS 3.4
-- Lucide React (图标库)
-- PostCSS + Autoprefixer
-
-### 状态管理
-- Zustand 5.0
-
-### 开发工具
-- ESLint
-- TypeScript
-- Vite
+- [ ] 所有前端应用可正常访问
+- [ ] API Gateway 健康检查通过
+- [ ] API 文档可正常访问
+- [ ] 前后端通信正常
+- [ ] 聊天功能正常工作
+- [ ] 流式输出正常
+- [ ] 知识库功能正常
+- [ ] 认证功能正常
+- [ ] HTTPS证书配置正确
+- [ ] 日志与监控正常
 
 ---
 
-## 📦 Docker 部署
+## 文档与资源
 
-每个应用都可以独立 Docker 化：
+- [部署指南](./docs/deployment.md) - 详细的部署说明
+- [API测试指南](./docs/api-testing.md) - API测试用例和调试方法
+- [后端仓库](https://github.com/BH3PHW/rag-customer-service) - 后端服务代码
+- [联合调试报告](../backend/tests/api-joint-debug-report.md) - 前后端联调报告
 
-```bash
-# 构建 Docker 镜像
-docker build -t rag-consumer ./apps/consumer
-docker build -t rag-enterprise ./apps/enterprise
-docker build -t rag-system-admin ./apps/system-admin
-```
+## 开发指南
 
-或者使用 docker-compose：
+### 添加新页面
 
-```bash
-docker-compose -f docker-compose.integrated.yml up
-```
+1. 在 `apps/[app-name]/src/pages/` 目录创建新的React组件
+2. 在 `App.tsx` 中添加路由和菜单
+3. 在 `api/client.ts` 中添加相应的API调用函数
 
----
+### 调试技巧
 
-## 🚀 性能优化
+- 打开浏览器开发者工具 (F12)
+- 查看Console中的API请求和响应
+- 使用Network标签查看请求详情
+- 检查是否有CORS错误或API地址错误
 
-### 代码分割
-- 每个应用独立构建
-- 使用 React.lazy 进行路由分割
-- 共享包单独构建
+## 许可证
 
-### 优化策略
-- Tailwind CSS 生产构建使用 purge
-- Vite 生产构建使用 minify
-- 图片资源优化
-- 懒加载组件
-
----
-
-## 📝 许可
-
-本项目采用 GNU General Public License v3.0 开源许可。
+MIT License
