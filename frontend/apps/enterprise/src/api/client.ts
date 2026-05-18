@@ -37,7 +37,7 @@ export interface Document {
   status: string;
 }
 
-const DEFAULT_BASE_URL = 'http://localhost:8000';
+const DEFAULT_BASE_URL = 'http://localhost:8080';
 let authToken: string | null = null;
 
 const getBaseUrl = (): string => {
