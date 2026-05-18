@@ -1,12 +1,12 @@
 # RAG 智能客服 - Python 入门教程 4：微服务架构与部署
 
 ## 📚 目录
-1. [什么是微服务
-2. [项目微服务架构详解
-3. [Docker与容器化
-4. [部署到服务器
-5. [调试与问题解决
-6. [总结与下一步
+1. [什么是微服务](#1-什么是微服务)
+2. [项目微服务架构详解](#2-项目微服务架构详解)
+3. [Docker与容器化](#3-docker与容器化)
+4. [部署到服务器](#4-部署到服务器)
+5. [调试与问题解决](#5-调试与问题解决)
+6. [总结与下一步](#6-总结与下一步)
 
 ---
 
@@ -14,7 +14,7 @@
 
 ### 🏛️ 单体vs微服务
 
-**单体应用（传统方式：
+**单体应用（传统方式）：**
 ```
 一个大程序，把所有功能都塞在一起
 ┌─────────────────────────────┐
@@ -23,7 +23,7 @@
 └─────────────────────────────┘
 ```
 
-**微服务（项目的方式：
+**微服务（项目的方式）：**
 ```
 多个小程序，各自独立，互相协作
 ┌──────┐  ┌──────┐  ┌──────┐
@@ -53,15 +53,15 @@
 ┌─────────────────────────────────────────────────────────┐
 │                      前端层                              │
 │  ┌──────────────┐ ┌──────────────┐ ┌──────────────────┐  │
-│  │消费者Widget  │ │ 企业管理控制台 │ │ 系统管理后台    │  │
-│  │ (3000端口)   │ │  (8080端口)  │ │  (9090端口)      │  │
+│  │消费者端      │ │ 企业管理端    │ │ 系统管理端        │  │
+│  │ (3001端口)   │ │  (3002端口)  │ │  (3003端口)      │  │
 │  └──────┬───────┘ └───────┬──────┘ └──────┬───────────┘  │
 └─────────┼─────────────────┼─────────────────┼───────────────┘
           │                 │                 │
           └─────────────────┴─────────────────┘
                             │
 ┌─────────────────────────────────────────────────────────┐
-│                     API网关 (8000端口)                    │
+│                     API网关 (8080端口)                    │
 │              [ 统一入口、路由转发、安全 ]                   │
 └───────────────────────┬─────────────────────────────────┘
                         │
@@ -69,7 +69,7 @@
     │                   │                   │
     ▼                   ▼                   ▼
 ┌──────────┐     ┌──────────┐      ┌──────────┐
-│聊天服务  │     │渠道服务  │      │知识服务  │
+│用户服务   │     │聊天服务   │      │知识服务   │
 │ (8001)   │     │ (8002)   │      │ (8003)   │
 └──────────┘     └──────────┘      └──────────┘
          │                   │
@@ -87,11 +87,12 @@
 
 | 服务 | 端口 | 作用 |
 |------|------|------|
-| **API Gateway** | 8000 | 统一入口，路由转发 |
-| **Chat Service** | 8001 | 智能对话、流式输出 |
+| **API Gateway** | 8080 | 统一入口，路由转发 |
+| **User Service** | 8001 | 用户认证、企业管理 |
+| **Chat Service** | 8002 | 智能对话、流式输出 |
 | **Knowledge Service** | 8003 | 知识库、FAQ管理 |
+| **Alert Service** | 8004 | 敏感内容告警 |
 | **Channel Service** | 8005 | 多渠道接入（微信等） |
-| **Admin API** | 8080 | 管理后台接口 |
 
 ---
 
@@ -105,7 +106,7 @@
 - 调用大模型
 - 流式输出（打字机效果）
 - 敏感内容检测
-- 转人工客服
+- RAG检索
 
 看一下 `backend/chat-service/main.py` 的简化版：
 
@@ -114,17 +115,17 @@ from fastapi import FastAPI
 
 app = FastAPI(title="聊天服务")
 
-# 聊天API（流式输出
-@app.post("/api/v1/chat/sessions/{session_id}/messages/stream")
-async def chat_stream(session_id: str, message: str):
-    """流式聊天API"""
+# 聊天API
+@app.post("/api/v1/chat/sessions")
+async def chat(message: str):
+    """聊天API"""
     # 这里是真实聊天逻辑
     pass
 
-# 转人工
-@app.post("/api/v1/chat/sessions/{session_id}/escalate")
-async def escalate_to_human(session_id: str):
-    """转人工客服"""
+# 流式聊天API
+@app.post("/api/v1/chat/stream")
+async def chat_stream(message: str):
+    """流式聊天API"""
     pass
 ```
 
@@ -137,14 +138,14 @@ async def escalate_to_human(session_id: str):
 - 语义搜索
 - FAQ管理
 
-### 📡 Channel Service（渠道服务）
-路径：`backend/channel-service/`
+### 📡 User Service（用户服务）
+路径：`backend/user-service/`
 
 核心功能：
-- 微信公众号接入
-- 网页Widget接入
-- 统一身份管理（OneID
-- 差异化消息渲染
+- 用户注册和登录
+- JWT认证
+- 企业管理
+- 敏感词设置
 
 ---
 
@@ -179,15 +180,15 @@ RUN pip install -r requirements.txt
 COPY . .
 
 # 暴露端口
-EXPOSE 8001
+EXPOSE 8002
 
 # 启动命令
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8002"]
 ```
 
-### 🤝 Docker Compose（编排工具
+### 🤝 Docker Compose（编排工具）
 
-看项目根目录的 `docker-compose.yml`：
+看项目中的 `docker-compose.yml`：
 
 ```yaml
 version: '3.8'
@@ -210,18 +211,18 @@ services:
   
   # API网关
   api-gateway:
-    build: ./backend/api-gateway
+    build: ./api-gateway
     ports:
-      - "8000:8000"
+      - "8080:8080"
     depends_on:
       - postgres
       - redis
   
   # 聊天服务
   chat-service:
-    build: ./backend/chat-service
+    build: ./chat-service
     ports:
-      - "8001:8001"
+      - "8002:8002"
 ```
 
 ### 🚀 用Docker Compose一键启动
@@ -283,16 +284,16 @@ SECRET_KEY=your-secret-key-here
 1. 上传代码到服务器（git clone或上传文件）
 2. 在服务器上运行：
    ```bash
-   cd backend-rag-customer-service
+   cd backend
    docker-compose up -d
    ```
 3. 配置域名和Nginx（生产环境需要）
 
-### 🛡️ 安全设置（生产环境必备
+### 🛡️ 安全设置（生产环境必备）
 
 - 修改默认密码
 - 配置防火墙
-- 启用HTTPS（SSL证书
+- 启用HTTPS（SSL证书）
 - 定期备份数据
 - 监控和日志
 
@@ -316,7 +317,7 @@ docker-compose logs -f api-gateway
 #### 问题1：端口被占用
 ```bash
 # 查找被占用的端口
-sudo lsof -i :8000
+sudo lsof -i :8080
 
 # 杀掉进程或换一个端口
 ```
@@ -370,10 +371,10 @@ docker-compose exec postgres ping
 ### 📖 项目中的学习路径
 
 建议按以下顺序学习项目代码：
-1. `backend/admin-console-api/` - 简单的管理API
-2. `backend/chat-service/` - 核心聊天逻辑
-3. `backend/knowledge-service/` - 知识库和向量
-4. `frontend-*` - 前端代码（JavaScript
+1. `backend/api-gateway/main.py` - API网关入口
+2. `backend/user-service/main.py` - 用户服务API
+3. `backend/chat-service/main.py` - 核心聊天逻辑
+4. `backend/knowledge-service/main.py` - 知识库和向量
 
 ---
 

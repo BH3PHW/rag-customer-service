@@ -41,13 +41,30 @@
 ## 🗂️ 项目结构快速导航
 
 ```
+rag-customer-service/      # 后端仓库
+├── backend/
+│   ├── api-gateway/      # API网关（端口8080）
+│   ├── user-service/     # 用户服务（端口8001）
+│   ├── chat-service/     # 聊天服务（端口8002）
+│   ├── knowledge-service/ # 知识库服务（端口8003）
+│   ├── alert-service/    # 告警服务（端口8004）
+│   ├── channel-service/  # 渠道服务（端口8005）
+│   ├── admin-service/    # 管理服务（端口8006）
+│   └── analytics-service/ # 分析服务（端口8007）
+│
+rag-agent-frontend/        # 前端仓库
+├── apps/
+│   ├── consumer/         # 消费者端（端口3001）
+│   ├── enterprise/       # 企业端（端口3002）
+│   └── system-admin/    # 管理端（端口3003）
+│
 LEARNING/
 ├── 01_python_basics.md              # 第1课
 ├── 02_web_development.md            # 第2课
 ├── 03_database.md                   # 第3课
-├── 04_microservices_deployment.md   # 第4课
+├── 04_microservices_deployment.md    # 第4课
 ├── COURSE_OVERVIEW.md               # 本文件
-└── PRACTICE/                        # 练习代码（见下一节
+└── PRACTICE/                        # 练习代码
 ```
 
 ---
@@ -62,7 +79,7 @@ LEARNING/
 2. **第2周** - Web开发（02_web_development.md）
    - 运行FastAPI示例
    - 写你的第一个API
-   - 看项目中的管理API代码
+   - 看项目中的API Gateway代码
 
 3. **第3周** - 数据库（03_database.md）
    - 练习SQLite
@@ -157,11 +174,11 @@ pip install fastapi uvicorn sqlalchemy redis chromadb
 ## 📋 学习资源
 
 ### 项目文件建议阅读顺序
-1. `backend/user-service/main.py` - 简单易懂的用户服务API
-2. `backend/chat-service/main.py` - 核心业务逻辑
-3. `backend/knowledge-service/main.py` - 知识库服务
-4. `frontend/enterprise/public/js/app.js` - 前端交互逻辑
-5. `docker-compose.yml` - 整体架构
+1. `backend/api-gateway/main.py` - API网关入口（最简单）
+2. `backend/user-service/main.py` - 用户服务API
+3. `backend/chat-service/main.py` - 核心业务逻辑
+4. `backend/knowledge-service/main.py` - 知识库服务
+5. `frontend/apps/consumer/src/App.tsx` - 消费者端前端
 
 ### 官方文档
 - Python: https://docs.python.org/zh-cn/3/

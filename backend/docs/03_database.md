@@ -1,13 +1,13 @@
 # RAG 智能客服 - Python 入门教程 3：数据库与持久化
 
 ## 📚 目录
-1. [什么是数据库
-2. [SQLite入门（最简单的数据库
-3. [项目中的数据库
-4. [SQLAlchemy ORM
-5. [Redis缓存
-6. [向量数据库（ChromaDB
-7. [总结与实践
+1. [什么是数据库](#1-什么是数据库)
+2. [SQLite入门（最简单的数据库）](#2-sqlite入门)
+3. [项目中的数据库](#3-项目中的数据库)
+4. [SQLAlchemy ORM](#4-sqlalchemy-orm)
+5. [Redis缓存](#5-redis缓存)
+6. [向量数据库（ChromaDB）](#6-向量数据库chromadb)
+7. [总结与实践](#7-总结与实践)
 
 ---
 
@@ -25,9 +25,9 @@
 ### 🗃️ 常见的数据库类型
 
 在我们的项目中使用了这些：
-1. **PostgreSQL** - 主数据库（存用户、企业、对话历史
-2. **Redis** - 缓存数据库（存临时数据、会话
-3. **ChromaDB** - 向量数据库（存文档和语义检索
+1. **PostgreSQL** - 主数据库（存用户、企业、对话历史）
+2. **Redis** - 缓存数据库（存临时数据、会话）
+3. **ChromaDB** - 向量数据库（存文档和语义检索）
 
 ---
 
@@ -115,7 +115,8 @@ python first_sqlite.py
 ## 3. 项目中的数据库
 
 让我们看一个项目中的简化版本：
-`backend/user-service/database.py` (简化版
+
+`backend/user-service/database.py`（简化版）：
 
 ```python
 from sqlalchemy import create_engine
@@ -145,7 +146,7 @@ def get_db():
 
 ---
 
-## 4. SQLAlchemy ORM（对象关系映射
+## 4. SQLAlchemy ORM（对象关系映射）
 
 ### 🏗️ 什么是ORM？
 
@@ -278,7 +279,7 @@ r.lpush('chat_history', '请问配送时间')
 r.lpush('chat_history', '谢谢')
 print(f"\n💬 最近对话: {r.lrange('chat_history', 0, -1)}")
 
-# 5. 使用哈希（Hash
+# 5. 使用哈希（Hash）
 user_data = {
     'id': 'user_001',
     'name': '小明',
@@ -313,7 +314,7 @@ print("\n✅ Redis示例完成！")
 
 ---
 
-## 6. 向量数据库（ChromaDB
+## 6. 向量数据库（ChromaDB）
 
 ### 🧠 什么是向量数据库？
 
