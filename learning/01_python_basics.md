@@ -1,12 +1,12 @@
 # RAG 智能客服 - Python 入门教程 1：从零开始
 
 ## 📚 目录
-1. [欢迎来到Python与项目介绍
-2. [准备工作
-3. [项目结构概览
-4. [你的第一个Python程序
-5. [从项目中的Python基础
-6. [总结与下一步
+1. [欢迎来到Python与项目介绍](#1-欢迎来到python与项目介绍)
+2. [准备工作](#2-准备工作)
+3. [项目结构概览](#3-项目结构概览python后端部分)
+4. [你的第一个Python程序](#4-你的第一个python程序)
+5. [从项目中的Python基础](#5-从项目中的python基础)
+6. [总结与下一步](#6-总结与下一步)
 
 ---
 
@@ -17,6 +17,7 @@
 恭喜你开始学习这个完整的企业级项目！这个RAG（检索增强生成）智能客服系统！
 
 ### 💡 什么是这个项目？
+
 这是一个完整的智能客服系统，它可以：
 - 自动回答客户问题
 - 理解用户意图
@@ -32,7 +33,7 @@
 - Python基础概念
 - Web服务器开发
 - 数据库操作
-- API（检索增强生成）概念
+- API概念
 - 实际的Web开发技术
 
 ---
@@ -61,22 +62,26 @@ python3 --version
 ### 📦 安装必要的工具
 
 你需要学习的工具：
-- **VS Code（推荐）或者其他你喜欢的编辑器
+- **VS Code（推荐）** 或者其他你喜欢的编辑器
 - 学习时的基础知识
 
 ### 💻 认识一下我们的项目
 
-让我们先看看项目的结构（只看关键部分：
+让我们先看看项目的结构（只看关键部分）：
 
 ```
-backend-rag-customer-service/
+rag-customer-service/     # 后端仓库
 ├── backend/
-│   ├── chat-service/      # 聊天服务
+│   ├── api-gateway/      # API网关（端口8080）
+│   ├── chat-service/    # 聊天服务
 │   ├── knowledge-service/ # 知识库服务
-│   └── ...其他服务
-├── frontend-consumer/      # 消费者前端
-├── frontend-enterprise/  # 企业前端
-└── docs/                  # 文档
+│   └── user-service/    # 用户服务
+│
+rag-agent-frontend/       # 前端仓库
+├── apps/
+│   ├── consumer/         # 消费者端（端口3001）
+│   ├── enterprise/      # 企业端（端口3002）
+│   └── system-admin/    # 管理端（端口3003）
 ```
 
 ---
@@ -92,7 +97,7 @@ backend-rag-customer-service/
 ### 文件类型说明：
 - `.py` - Python源文件，你写的代码就在这里面
 - `Dockerfile` - 配置文件，用于部署
-- `requirements.txt` - 告诉Python依赖库
+- `requirements.txt` - 告诉Python需要安装哪些依赖库
 
 让我们先看看一个最简单的Python文件
 
@@ -150,7 +155,7 @@ python hello.py
 
 我们先看一个最简单的配置文件：
 
-`backend/chat-service/config.py`（为了简单，我们简化一下内容：
+`backend/chat-service/config.py`（为了简单，我们简化一下内容）：
 
 ```python
 # 配置文件 - 这是一个常见的Python文件
@@ -160,7 +165,7 @@ DEFAULT_ENTERPRISE_ID = "demo-enterprise"
 DEFAULT_USER_ID = "demo-user"
 
 # 配置API端点
-API_GATEWAY_URL = "http://localhost:8000"
+API_GATEWAY_URL = "http://localhost:8080"
 
 # 输出这些配置
 print("配置加载中...")
@@ -172,7 +177,7 @@ print("配置加载完成！")
 
 ### 理解函数（Function）
 
-函数是一段重复使用的代码块。我们先看项目中的函数：
+函数是一段可以重复使用的代码块。我们先看项目中的函数：
 
 ```python
 # 简单函数示例
@@ -248,7 +253,7 @@ print(f"答: {answer}")
 print("🎉 简单服务器启动中...")
 print("👉 访问 http://localhost:8000 来测试")
 
-# 模拟路由（简单字典存储
+# 模拟路由（简单字典存储）
 chat_history = []
 
 # 简单的聊天函数
@@ -268,7 +273,7 @@ def chat_with_bot(user_message):
 
 # 主循环（模拟服务器）
 while True:
-    user_input = input("\n请输入你的问题（输入exit退出): ")
+    user_input = input("\n请输入你的问题（输入exit退出）: ")
     if user_input == "exit":
         break
     

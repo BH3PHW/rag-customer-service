@@ -1,12 +1,12 @@
 # RAG 智能客服 - Python 入门教程 2：Web开发入门
 
 ## 📚 目录
-1. [什么是Web框架
-2. [FastAPI入门
-3. [写你的第一个API
-4. [在项目中看真实的代码
-5. [理解路由与请求
-6. [总结与练习
+1. [什么是Web框架](#1-什么是web框架)
+2. [FastAPI入门](#2-fastapi入门)
+3. [写你的第一个API](#3-写你的第一个api)
+4. [在项目中看真实的代码](#4-在项目中看真实的代码)
+5. [理解路由与请求](#5-理解路由与请求)
+6. [总结与练习](#6-总结与练习)
 
 ---
 
@@ -54,7 +54,7 @@ from fastapi import FastAPI
 # 创建一个应用实例
 app = FastAPI()
 
-# 定义一个路由（当访问首页时
+# 定义一个路由（当访问首页时）
 @app.get("/")
 async def root():
     """根路径，显示欢迎信息"""
@@ -72,7 +72,7 @@ async def greet(name: str):
         "message": "欢迎使用我们的服务"
     }
 
-# 聊天API（简化版
+# 聊天API（简化版）
 @app.post("/chat/{user_id}")
 async def chat(user_id: str, message: str):
     """简单的聊天API"""
@@ -103,32 +103,33 @@ uvicorn first_api:app --reload --port 8080
 ```
 
 现在访问：
-- 浏览器打开 `http://localhost:8080`  - 看到欢迎信息
-- 访问 `http://localhost:8080/docs`  - Swagger文档（这是测试API的好工具！）
+- 浏览器打开 `http://localhost:8080` - 看到欢迎信息
+- 访问 `http://localhost:8080/docs` - Swagger文档（这是测试API的好工具！）
 
 ---
 
 ## 3. 看项目中的真实代码
 
 现在让我们看一下真实项目中的代码：
-`backend/admin-console-api/main.py`
+
+`backend/api-gateway/main.py`（简化版）：
 
 ```python
 from fastapi import FastAPI
 
 # 创建应用
 app = FastAPI(
-    title="RAG 智能客服 - 管理后台 API",
-    description="完整的系统管理功能",
-    version="2.2.0"
+    title="RAG 智能客服 - API Gateway",
+    description="统一的API网关，处理所有前端请求",
+    version="1.0.0"
 )
 
 # 健康检查
 @app.get("/")
 async def root():
     return {
-        "name": "RAG 智能客服 - 管理后台 API",
-        "version": "2.2.0",
+        "name": "RAG 智能客服 - API Gateway",
+        "version": "1.0.0",
         "docs": "/docs"
     }
 
@@ -136,16 +137,17 @@ async def root():
 async def health_check():
     return {
         "status": "healthy",
-        "service": "admin-console-api"
+        "service": "api-gateway",
+        "port": 8080
     }
 
-@app.get("/api/v1/dashboard/summary")
-async def dashboard_summary():
-    """返回仪表盘数据"""
+@app.get("/api/v1/stats")
+async def get_stats():
+    """返回系统统计信息"""
     return {
         "success": True,
         "data": {
-            "total_tenants": 127,
+            "total_enterprises": 127,
             "active_users": 8432,
             "total_chats": 245678,
             "satisfaction_rate": 98.5
@@ -180,7 +182,7 @@ from typing import List
 
 app = FastAPI(title="简化聊天服务")
 
-# 数据模型（Pydantic
+# 数据模型（Pydantic）
 class ChatMessage(BaseModel):
     role: str  # "user" 或 "assistant"
     content: str
@@ -190,7 +192,7 @@ class ChatSession:
     def __init__(self):
         self.messages: List[ChatMessage] = []
 
-# 会话存储（简单字典
+# 会话存储（简单字典）
 sessions = {}
 
 # 创建会话
@@ -278,7 +280,7 @@ from pydantic import BaseModel, Field
 from typing import Optional
 from enum import Enum
 
-# 枚举类型（有限的选择
+# 枚举类型（有限的选择）
 class UserRole(str, Enum):
     ADMIN = "admin"
     CUSTOMER = "customer"
@@ -321,16 +323,16 @@ if __name__ == "__main__":
 
 ---
 
-## 6. CORS跨域（浏览器与API通信
+## 6. CORS跨域（浏览器与API通信）
 
-在 `backend/admin-console-api/main.py` 中有CORS设置：
+在 `backend/api-gateway/main.py` 中有CORS设置：
 
 ```python
 from fastapi.middleware.cors import CORSMiddleware
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 允许所有来源（生产时要限制
+    allow_origins=["*"],  # 允许所有来源（生产时要限制）
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
